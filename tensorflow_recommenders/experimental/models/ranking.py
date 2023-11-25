@@ -61,7 +61,8 @@ class Ranking(models.Model):
       bottom_stack: Optional[tf.keras.layers.Layer] = None,
       feature_interaction: Optional[tf.keras.layers.Layer] = None,
       top_stack: Optional[tf.keras.layers.Layer] = None,
-      task: Optional[tasks.Task] = None) -> None:
+      task: Optional[tasks.Task] = None,
+      concat_dense: Optional[bool] = True) -> None:
     """Initializes the model.
 
     Args:
@@ -94,6 +95,7 @@ class Ranking(models.Model):
         units=[512, 256, 1], final_activation="sigmoid")
     self._feature_interaction = (feature_interaction if feature_interaction
                                  else feature_interaction_lib.DotInteraction())
+    self._concat_dense=concat_dense
 
     if task is not None:
       self._task = task
@@ -211,8 +213,11 @@ class Ranking(models.Model):
 
     interaction_args = sparse_embedding_vecs + [dense_embedding_vec]
     interaction_output = self._feature_interaction(interaction_args)
-    feature_interaction_output = tf.concat(
-        [dense_embedding_vec, interaction_output], axis=1)
+    if self._concat_dense:
+      feature_interaction_output = tf.concat(
+          [dense_embedding_vec, interaction_output], axis=1)
+    else:
+      feature_interaction_output = interaction_output
 
     prediction = self._top_stack(feature_interaction_output)
 
