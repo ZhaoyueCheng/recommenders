@@ -61,6 +61,7 @@ class Ranking(models.Model):
       bottom_stack: Optional[tf.keras.layers.Layer] = None,
       feature_interaction: Optional[tf.keras.layers.Layer] = None,
       top_stack: Optional[tf.keras.layers.Layer] = None,
+      concat_dense: bool=True,
       task: Optional[tasks.Task] = None) -> None:
     """Initializes the model.
 

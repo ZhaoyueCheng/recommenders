@@ -16,3 +16,4 @@
 
 from tensorflow_recommenders.layers.feature_interaction.dcn import Cross
 from tensorflow_recommenders.layers.feature_interaction.dot_interaction import DotInteraction
+from tensorflow_recommenders.layers.feature_interaction.multi_layer_dcn import MultiLayerDCN
