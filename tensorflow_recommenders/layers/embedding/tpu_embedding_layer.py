@@ -41,7 +41,7 @@ _OPTIMIZER_PARAMETERS = {
              ["learning_rate", "beta_1", "beta_2",
               "epsilon"], ["decay", "amsgrad"]),
     "Adagrad": (tf.tpu.experimental.embedding.Adagrad,
-                ["learning_rate", "initial_accumulator_value"], ["epsilon"]),
+                ["learning_rate", "initial_accumulator_value", "epsilon"], []), ### need XLA change to work
     "Ftrl": (tf.tpu.experimental.embedding.FTRL, [
         "learning_rate", "learning_rate_power", "l1_regularization_strength",
         "l2_regularization_strength", "beta", "initial_accumulator_value"

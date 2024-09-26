@@ -65,21 +65,20 @@ class Model(tf.keras.Model):
     """Custom train step using the `compute_loss` method."""
 
     with tf.GradientTape() as tape:
-      loss = self.compute_loss(inputs, training=True)
+      loss, labels, outputs = self.compute_loss(inputs, training=True)
 
-      # Handle regularization losses as well.
-      regularization_loss = tf.reduce_sum(
-          [tf.reduce_sum(loss) for loss in self.losses]
-      )
-
-      total_loss = loss + regularization_loss
-
+      total_loss = loss  # + regularization_loss
+    # total_loss = tf.nn.compute_average_loss(loss, global_batch_size=135168)
     gradients = tape.gradient(total_loss, self.trainable_variables)
+    # for i in self.trainable_variables:
+    #   tf._logging.info(f"Variable: {i}")
     self.optimizer.apply_gradients(zip(gradients, self.trainable_variables))
 
-    metrics = {metric.name: metric.result() for metric in self.metrics}
+    self.compiled_metrics.update_state(labels, outputs)
+
+    metrics = self.get_metrics_result()
     metrics["loss"] = loss
-    metrics["regularization_loss"] = regularization_loss
+    metrics["regularization_loss"] = 0  # regularization_loss
     metrics["total_loss"] = total_loss
 
     return metrics
@@ -87,18 +86,13 @@ class Model(tf.keras.Model):
   def test_step(self, inputs):
     """Custom test step using the `compute_loss` method."""
 
-    loss = self.compute_loss(inputs, training=False)
-
-    # Handle regularization losses as well.
-    regularization_loss = tf.reduce_sum(
-        [tf.reduce_sum(loss) for loss in self.losses]
-    )
-
-    total_loss = loss + regularization_loss
-
-    metrics = {metric.name: metric.result() for metric in self.metrics}
+    loss, labels, outputs = self.compute_loss(inputs, training=False)
+    total_loss = loss  # + regularization_loss
+    # total_loss = tf.nn.compute_average_loss(loss, global_batch_size=135168)
+    self.compiled_metrics.update_state(labels, outputs)
+    metrics = self.get_metrics_result()
     metrics["loss"] = loss
-    metrics["regularization_loss"] = regularization_loss
+    metrics["regularization_loss"] = 0  # regularization_loss
     metrics["total_loss"] = total_loss
 
-    return metrics
+    return metrics # , labels, outputs

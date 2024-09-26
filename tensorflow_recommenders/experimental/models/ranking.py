@@ -23,6 +23,16 @@ from tensorflow_recommenders import models
 from tensorflow_recommenders import tasks
 from tensorflow_recommenders.layers import feature_interaction as feature_interaction_lib
 
+class MaskedAUC(tf.keras.metrics.AUC):
+  def __init__(self, padding_label=-1, **kwargs):
+    super().__init__(from_logits=True, **kwargs)
+    self.padding_label = padding_label
+
+  def update_state(self, y_true, y_pred, sample_weight=None):
+    sample_weight = tf.cast(y_true >= 0, tf.float32)
+
+    return super().update_state(y_true, y_pred, sample_weight)
+
 
 class Ranking(models.Model):
   """A configurable ranking model.
